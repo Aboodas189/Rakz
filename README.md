@@ -13,6 +13,14 @@
 - Focus score calculation.
 
 
+![image](https://github.com/user-attachments/assets/b5853b2d-ad5d-4912-923d-be63cf601904)
 
+
+**Tools Used:**
+
+![image](https://github.com/user-attachments/assets/ca1bc291-eab1-4b77-9ccc-524073d3b29d)
+
+
+Demo:
 
 
