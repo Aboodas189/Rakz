@@ -24,6 +24,9 @@
 **Demo:**
 
 
-<video src="output.mp4" controls="controls" style="max-width: 100%;">
-[Watch the video](Untitled%20video%20-%20Made%20with%20Clipchamp.mp4)
+Demo:
+
+<video src="Untitled%20video%20-%20Made%20with%20Clipchamp.mp4" controls="controls" style="max-width: 100%;">
+    Your browser does not support the video tag. [Watch the video](Untitled%20video%20-%20Made%20with%20Clipchamp.mp4)
 </video>
+
