@@ -23,6 +23,6 @@
 
 **Demo:**
 
-![video](Untitled%20video%20-%20Made%20with%20Clipchamp.mp4)
+https://github.com/user-attachments/assets/889438c4-08d4-433a-8c10-44f4a397c86e
 
 
