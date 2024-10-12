@@ -1,0 +1,10 @@
+opencv-python-headless
+mediapipe
+numpy
+pandas
+matplotlib
+seaborn
+plotly
+streamlit
+streamlit-webrtc
+av
