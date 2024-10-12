@@ -42,7 +42,7 @@ Used for creating an interactive web app interface, allowing users to perform re
 
 
 
-**Example for using mediapip**
+**Example for using mediapip:**
 
 ![image](https://github.com/user-attachments/assets/e6a94375-244e-46e0-9111-6708c1f0afb9)
 
