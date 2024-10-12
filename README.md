@@ -11,6 +11,7 @@
 - Eye and iris feature detection.
 - Eye closure duration detection.
 - Focus score calculation.
+- Focus score For using phone.
 
 
 ![image](https://github.com/user-attachments/assets/b5853b2d-ad5d-4912-923d-be63cf601904)
