@@ -30,12 +30,12 @@ Used for creating an interactive web app interface, allowing users to perform re
 
 - Provides tools for processing video frames and performing tasks like face and eye detection, which are crucial for tracking gaze direction and blinks.
 
-- 
+  
 **NumPy:**
 
 - Used for efficient numerical operations, such as manipulating eye landmarks and calculating distances between key facial points.
 
-- 
+  
 **MediaPipe:**
 
 - Utilized for detecting facial landmarks, including the eyes and irises, enabling accurate tracking of gaze direction and eye closures.
