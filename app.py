@@ -443,16 +443,19 @@ def app():
   tab1, tab2 = st.tabs(["🎥 Live Video", "📤 Upload Video"])
   
   with tab1:
-      st.header("🔴 Webcam Feed")
-      webrtc_streamer(
-          key="camera",
-          mode=WebRtcMode.SENDRECV,
-          media_stream_constraints={
-              "video": True,
-              "audio": False,
-          },
-          video_frame_callback=video_frame_callback,
-      )
+    st.header("🔴 Webcam Feed")
+    webrtc_streamer(
+        key="camera",
+        mode=WebRtcMode.SENDRECV,
+        media_stream_constraints={
+            "video": True,
+            "audio": False,
+        },
+        video_frame_callback=video_frame_callback,
+        rtc_configuration={  # Add STUN server for WebRTC configuration
+            "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]
+        }
+    )
   
   with tab2:
       st.header("📥 Upload Video for Analysis")
