@@ -21,7 +21,29 @@
 ![image](https://github.com/user-attachments/assets/ca1bc291-eab1-4b77-9ccc-524073d3b29d)
 
 
+**Streamlit:**
+
+Used for creating an interactive web app interface, allowing users to perform real-time focus detection through webcam feeds or upload videos for analysis.
+
+
+**OpenCV:**
+
+- Provides tools for processing video frames and performing tasks like face and eye detection, which are crucial for tracking gaze direction and blinks.
+
+- 
+**NumPy:**
+
+- Used for efficient numerical operations, such as manipulating eye landmarks and calculating distances between key facial points.
+
+- 
+**MediaPipe:**
+
+- Utilized for detecting facial landmarks, including the eyes and irises, enabling accurate tracking of gaze direction and eye closures.
+
+
+
 **Example for using mediapip**
+
 ![image](https://github.com/user-attachments/assets/e6a94375-244e-46e0-9111-6708c1f0afb9)
 
 
