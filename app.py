@@ -174,6 +174,10 @@ def process_frame(frame, face_mesh, focus_score, last_look_centered_time, not_lo
           if not blink_detected:
               blink_start_time = current_time
               blink_detected = True
+          elif current_time - blink_start_time >= BLINK_THRESHOLD:
+              # Decrease focus score by 5% if eyes are closed for 5 seconds
+              focus_score = max(0, focus_score - 5)
+              blink_start_time = current_time
       else:
           if blink_detected:
               blink_detected = False
@@ -363,14 +367,6 @@ def create_dashboard(df):
   fig_eye.update_layout(title='Eye Direction Distribution')
   st.plotly_chart(fig_eye)
   
-  # Sleep Analysis
-  st.subheader("Sleep Analysis")
-  sleep_count = df['sleep_count'].iloc[-1]
-  if sleep_count > 0:
-      st.write(f"Number of 10-second continuous sleep intervals: {sleep_count}")
-  else:
-      st.write("Great job staying attentive throughout the session!")
-  
   # Session Statistics
   st.subheader("Session Statistics")
   avg_focus_score = df['focus_score'].mean()
@@ -423,6 +419,18 @@ def export_to_pdf(df):
       pdf.savefig()
       plt.close()
 
+      # Sleep Analysis (Added to PDF)
+      plt.figure(figsize=(8, 6))
+      sleep_count = df['sleep_count'].iloc[-1]
+      if sleep_count > 0:
+          plt.text(0.5, 0.5, f"Number of 10-second continuous sleep intervals: {sleep_count}", ha='center', va='center', fontsize=12)
+      else:
+          plt.text(0.5, 0.5, "Great job staying attentive throughout the session!", ha='center', va='center', fontsize=12)
+      plt.title('Sleep Analysis')
+      plt.axis('off')
+      pdf.savefig()
+      plt.close()
+
   buffer.seek(0)
   return buffer
 
@@ -443,19 +451,16 @@ def app():
   tab1, tab2 = st.tabs(["🎥 Live Video", "📤 Upload Video"])
   
   with tab1:
-    st.header("🔴 Webcam Feed")
-    webrtc_streamer(
-        key="camera",
-        mode=WebRtcMode.SENDRECV,
-        media_stream_constraints={
-            "video": True,
-            "audio": False,
-        },
-        video_frame_callback=video_frame_callback,
-        rtc_configuration={  # Add STUN server for WebRTC configuration
-            "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]
-        }
-    )
+      st.header("🔴 Webcam Feed")
+      webrtc_streamer(
+          key="camera",
+          mode=WebRtcMode.SENDRECV,
+          media_stream_constraints={
+              "video": True,
+              "audio": False,
+          },
+          video_frame_callback=video_frame_callback,
+      )
   
   with tab2:
       st.header("📥 Upload Video for Analysis")
