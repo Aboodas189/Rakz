@@ -435,7 +435,7 @@ def export_to_pdf(df):
   return buffer
 
 def app():
-  st.title("📊 Focus Detection with WebRTC and Video Analysis")
+  st.title("📊 AI Platform for Focus Analysis ")
 
   # Sidebar for configuration
   st.sidebar.header("🔧 Configuration")
