@@ -13,6 +13,13 @@ from io import BytesIO
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import seaborn as sns  # Import seaborn for plotting
+import moviepy.editor as mp
+from vosk import Model, KaldiRecognizer
+import wave
+import os
+import json
+import tempfile
+from pydub import AudioSegment
 
 # =========================
 # Global Variables
@@ -434,56 +441,124 @@ def export_to_pdf(df):
   buffer.seek(0)
   return buffer
 
+  # =========================
+  # New code
+  # =========================
+
+# Function to convert video to audio
+def convert_video_to_audio(video_file):
+    tfile = tempfile.NamedTemporaryFile(delete=False)
+    tfile.write(video_file.read())
+    
+    video = mp.VideoFileClip(tfile.name)
+    audio_path = "extracted_audio.wav"
+    video.audio.write_audiofile(audio_path)
+    return audio_path
+
+# Function to convert audio to the format required for Vosk
+def convert_audio_for_vosk(audio_file):
+    sound = AudioSegment.from_wav(audio_file)
+    sound = sound.set_frame_rate(16000).set_channels(1)
+    output_file = "converted_audio.wav"
+    sound.export(output_file, format="wav")
+    return output_file
+
+# Function to transcribe audio using Vosk (offline)
+def transcribe_audio_vosk(audio_file):
+    model = Model(model_name="vosk-model-small-en-us-0.15")  # Download Vosk models from their website
+    wf = wave.open(audio_file, "rb")
+    
+    rec = KaldiRecognizer(model, wf.getframerate())
+    rec.SetWords(True)
+    transcript = ""
+
+    while True:
+        data = wf.readframes(4000)
+        if len(data) == 0:
+            break
+        if rec.AcceptWaveform(data):
+            result = rec.Result()
+            result_json = json.loads(result)
+            transcript += result_json.get("text", "") + " "
+
+    final_result = rec.FinalResult()
+    final_result_json = json.loads(final_result)
+    transcript += final_result_json.get("text", "")
+    
+    return transcript
+
+def process_video_and_transcribe(uploaded_file):
+    # Step 1: Convert video to audio
+    audio_path = convert_video_to_audio(uploaded_file)
+    
+    # Step 2: Convert audio to Vosk-compatible format
+    converted_audio = convert_audio_for_vosk(audio_path)
+    
+    # Step 3: Transcribe audio using Vosk
+    transcript = transcribe_audio_vosk(converted_audio)
+    
+    # Clean-up temporary audio files
+    os.remove(audio_path)
+    os.remove(converted_audio)
+    
+    return transcript
+
+# Main app
 def app():
-  st.title("📊 AI Platform for Focus Analysis ")
+    st.title("📊 AI Platform for Focus and Video-to-Text Analysis")
 
-  # Sidebar for configuration
-  st.sidebar.header("🔧 Configuration")
-  global CENTER_THRESHOLD, SIDE_THRESHOLD, BLINK_THRESHOLD, DISCOUNT_SIDE, DISCOUNT_EYES
+    # Sidebar for configuration
+    st.sidebar.header("🔧 Configuration")
+    global CENTER_THRESHOLD, SIDE_THRESHOLD, BLINK_THRESHOLD, DISCOUNT_SIDE, DISCOUNT_EYES
 
-  # CENTER_THRESHOLD = st.sidebar.slider("Center Look Threshold (seconds)", 1, 10, 5, key="center_threshold")
-  SIDE_THRESHOLD = st.sidebar.slider("Side Look Threshold (seconds)", 1, 10, 5, key="side_threshold")
-  DISCOUNT_SIDE = st.sidebar.slider("Side Look Discount (%)", 1, 5, 1, key="discount_side")
-  BLINK_THRESHOLD = st.sidebar.slider("Blink Threshold (seconds)", 1, 10, 5, key="blink_threshold")
-  DISCOUNT_EYES = st.sidebar.slider("Closed Eyes Discount (%)", 5, 30, 5, key="discount_eyes")
-  
-  # Tabs for Live Video and Upload Video
-  tab1, tab2 = st.tabs(["🎥 Live Video", "📤 Upload Video"])
-  
-  with tab1:
-      st.header("🔴 Webcam Feed")
-      webrtc_streamer(
-          key="camera",
-          mode=WebRtcMode.SENDRECV,
-          media_stream_constraints={
-              "video": True,
-              "audio": False,
-          },
-          video_frame_callback=video_frame_callback,
-      )
-  
-  with tab2:
-      st.header("📥 Upload Video for Analysis")
-      uploaded_file = st.file_uploader("Choose a video file", type=["mp4", "avi", "mov"])
-      
-      if uploaded_file is not None:
-          st.video(uploaded_file)
-          
-          if st.button("🔍 Analyze Video"):
-              with st.spinner("Analyzing video..."):
-                  results_df = process_uploaded_video(uploaded_file)
-              
-              st.success("✅ Analysis complete!")
-              create_dashboard(results_df)
-              
-              # Export to PDF
-              pdf_file = export_to_pdf(results_df)
-              st.download_button(
-                  label="💾 Download PDF Report",
-                  data=pdf_file,
-                  file_name="focus_analysis_report.pdf",
-                  mime="application/pdf"
-              )
+    SIDE_THRESHOLD = st.sidebar.slider("Side Look Threshold (seconds)", 1, 10, 5, key="side_threshold")
+    DISCOUNT_SIDE = st.sidebar.slider("Side Look Discount (%)", 1, 5, 1, key="discount_side")
+    BLINK_THRESHOLD = st.sidebar.slider("Blink Threshold (seconds)", 1, 10, 5, key="blink_threshold")
+    DISCOUNT_EYES = st.sidebar.slider("Closed Eyes Discount (%)", 5, 30, 5, key="discount_eyes")
+    
+    # Tabs for Live Video and Upload Video
+    tab1, tab2 = st.tabs(["🎥 Live Video", "📤 Upload Video"])
+    
+    with tab1:
+        st.header("🔴 Webcam Feed")
+        webrtc_streamer(
+            key="camera",
+            mode=WebRtcMode.SENDRECV,
+            media_stream_constraints={
+                "video": True,
+                "audio": False,
+            },
+            video_frame_callback=video_frame_callback,
+        )
+    
+    with tab2:
+        st.header("📥 Upload Video for Analysis and Transcription")
+        uploaded_file = st.file_uploader("Choose a video file", type=["mp4", "avi", "mov"])
+        
+        if uploaded_file is not None:
+            st.video(uploaded_file)
+            
+            # Button for analyzing focus and converting video to text
+            if st.button("🔍 Analyze Video and Convert to Text"):
+                with st.spinner("Analyzing video and converting audio to text..."):
+                    # Process the uploaded video for focus analysis
+                    results_df = process_uploaded_video(uploaded_file)
+                    st.success("✅ Video analysis complete!")
+                    create_dashboard(results_df)
+                    
+                    # Process the uploaded video to extract and convert audio to text
+                    transcript = process_video_and_transcribe(uploaded_file)
+                    st.subheader("Transcription Result")
+                    st.text_area("Transcript", transcript)
+                    
+                    # Export the analysis results to PDF
+                    pdf_file = export_to_pdf(results_df)
+                    st.download_button(
+                        label="💾 Download PDF Report",
+                        data=pdf_file,
+                        file_name="focus_analysis_report.pdf",
+                        mime="application/pdf"
+                    )
 
 if __name__ == "__main__":
-  app()
+    app()
