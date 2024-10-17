@@ -1,5 +1,6 @@
 import cv2 as cv
-import mediapipe as mp
+import mediapipe as mp_mediapipe  # Alias mediapipe to avoid conflict
+import moviepy.editor as mp  # Keep moviepy for video processing
 import numpy as np
 import math
 import time
@@ -13,7 +14,6 @@ from io import BytesIO
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import seaborn as sns  # Import seaborn for plotting
-import moviepy.editor as mp
 from vosk import Model, KaldiRecognizer
 import wave
 import os
@@ -39,7 +39,7 @@ RIGHT_EYE = [33, 7, 163, 144, 145, 153, 154, 155,
 LEFT_IRIS = [474, 475, 476, 477]
 RIGHT_IRIS = [469, 470, 471, 472]
 
-mp_face_mesh = mp.solutions.face_mesh
+mp_face_mesh = mp.solutions.face_mesh.FaceMesh
 
 # Initialize global variables for tracking
 focus_score = 100
